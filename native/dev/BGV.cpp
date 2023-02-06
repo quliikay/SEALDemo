@@ -13,6 +13,7 @@ using namespace seal;
 class BGV {
 private:
     int rol_a, col_a;
+    int blind;
 
     void print_matrix(vector<vector<uint64_t>> matrix, bool T = false) {
         if (T) {
@@ -60,14 +61,42 @@ private:
         return res;
     }
 
-    vector<vector<uint64_t>> init_message(int N, int M, int seed) {
+    vector<uint64_t> vector_mul_matrix(vector<uint64_t> a, vector<vector<uint64_t>> b) {
+        vector<uint64_t> res(a.size(), 0);
+        for (int j = 0; j < b[0].size(); j++) {
+            for (int i = 0; i < b.size(); i++)
+                res[j] += a[i] * b[i][j];
+        }
+        return res;
+    }
+
+    vector<vector<uint64_t>> init_message(int N, int seed) {
         srand(seed);
-        vector<vector<uint64_t>> res(N, vector<uint64_t>(M));
+        vector<vector<uint64_t>> res(N, vector<uint64_t>(N));
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++)
+            for (int j = 0; j < N; j++)
                 res[i][j] = rand() % 10 + 1;
         }
         return res;
+    }
+
+    vector<uint64_t> gen_check(int length, int seed) {
+        srand(seed);
+        vector<uint64_t> check(length);
+        generate(check.begin(), check.end(), []() {
+            return rand() % 11; // generates a random number between 0 and 10
+        });
+        return check;
+    }
+
+    string verification(vector<uint64_t> check, vector<vector<uint64_t>> message) {
+        vector<uint64_t> message_tail = message.back();
+        message.pop_back();
+        bool ver = (message_tail == vector_mul_matrix(check, message));
+        if (ver)
+            return "yes";
+        else
+            return "no";
     }
 
     Ciphertext
@@ -152,9 +181,13 @@ private:
     }
 
 public:
-    BGV(int rol_a, int col_a) {
-        this->rol_a = rol_a;
-        this->col_a = col_a;
+    BGV(int N, int blind) {
+        this->blind = blind;
+        if (blind)
+            rol_a = N + 1;
+        else
+            rol_a = N;
+        col_a = N;
     }
 
     void experiment(int flops, int log_epoch, int validation) {
@@ -187,26 +220,38 @@ public:
         BatchEncoder batch_encoder(context);
 
         // experiments
-        double server_time = 0;
-        double client_enc_time = 0;
-        double client_dec_time = 0;
+        double server_time = 0.0;
+        double client_enc_time = 0.0;
+        double client_dec_time = 0.0;
+        double client_prepare_time = 0.0;
+        double client_verification_time = 0.0;
+
         double cache = 0.0;
         clock_t client_enc_start, client_enc_end;
         clock_t client_dec_start, client_dec_end;
         clock_t server_start, server_end;
+        clock_t client_prepare_start, client_prepare_end;
+        clock_t client_verification_start, client_verification_end;
 
         for (int i = 0; i < flops; i++) {
             // init message
             srand(unsigned(time(nullptr)));
-            vector<vector<uint64_t>> message_a = init_message(rol_a, col_a, rand());
-            vector<vector<uint64_t>> message_b = init_message(col_a, col_a, rand());
+            vector<vector<uint64_t>> message_a = init_message(col_a, rand());
+            vector<vector<uint64_t>> message_b = init_message(col_a, rand());
+
+            // prepare
+            client_prepare_start = clock();
+            vector<uint64_t> check = gen_check(message_a.size(), rand());
+            message_a.push_back(vector_mul_matrix(check, message_a));
+            client_prepare_end = clock();
+            client_prepare_time += double(client_prepare_end - client_prepare_start) / CLOCKS_PER_SEC;
 
             // client a: convert message a to ciphertext
             client_enc_start = clock();
             Ciphertext ciphertext_a = matrix_to_ciphertext(message_a, batch_encoder, encryptor);
             client_enc_end = clock();
             client_enc_time += double(client_enc_end - client_enc_start) / CLOCKS_PER_SEC;
-            cache = sizeof(ciphertext_a) / (1024.0 * 1024.0);
+            cache += sizeof(ciphertext_a) / (1024.0 * 1024.0);
 
             // server: compute
             server_start = clock();
@@ -222,26 +267,35 @@ public:
             client_dec_end = clock();
             client_dec_time += double(client_dec_end - client_dec_start) / CLOCKS_PER_SEC;
 
+            // verification
+            string ver = "";
+            if (blind) {
+                client_verification_start = clock();
+                ver = verification(check, message_res);
+                client_verification_end = clock();
+                client_verification_time +=
+                        double(client_verification_end - client_verification_start) / CLOCKS_PER_SEC;
+            }
+
             if ((i + 1) % log_epoch == 0) {
-                if (validation == 0)
+                if (validation && blind)
+                    cout << "[" << i + 1 << "|" << flops << "] [" << client_prepare_time << "|" << client_enc_time
+                         << "|" << client_dec_time << "|" << client_verification_time << "] [" << server_time
+                         << "|" << cache << "] [" << ver << "]" << endl;
+                else if (blind)
+                    cout << "[" << i + 1 << "|" << flops << "] [" << client_prepare_time << "|" << client_enc_time
+                         << "|" << client_dec_time << "|" << client_verification_time << "] [" << server_time
+                         << "|" << cache << "]" << endl;
+                else {
                     cout << "[" << i + 1 << "|" << flops << "] [" << client_enc_time << "|" << client_dec_time << "|"
                          << server_time << "|" << cache << "]" << endl;
-                else {
-                    vector<vector<uint64_t>> ans = matrix_mul(message_a, message_b);
-                    string val;
-                    if (matrix_equal(ans, message_res))
-                        val = "correct";
-                    else
-                        val = "wrong";
-                    cout << "[" << i + 1 << "|" << flops << "] [" << client_enc_time << "|" << client_dec_time << "|"
-                         << server_time << "|" << cache << "]: " << val << endl;
                 }
             }
         }
     }
 };
 
-void experiment_bgv(int rol_a, int col_a, int flops, int log_epoch, int validation) {
-    BGV bgv(rol_a, col_a);
+void experiment_bgv(int N, int blind, int flops, int log_epoch, int validation) {
+    BGV bgv(N, blind);
     bgv.experiment(flops, log_epoch, validation);
 }

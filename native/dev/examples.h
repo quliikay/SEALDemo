@@ -22,7 +22,7 @@
 
 void experiment_bfv(int rol_a, int col_a, int flops, int log_epoch, int validation);
 
-void experiment_bgv(int rol_a, int col_a, int flops, int log_epoch, int validation);
+void experiment_bgv(int N, int blind, int flops, int log_epoch, int validation);
 
 void experiment_ckks(int rol_a, int col_a, int flops, int log_epoch, int validation);
 

@@ -8,9 +8,17 @@ using namespace seal;
 
 int main() {
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
+    cout << "N: ";
+    int N;
+    cin >> N;
+
     cout << "blind: ";
     int blind;
     cin >> blind;
+
+    cout << "shift: ";
+    int shift;
+    cin >> shift;
 
     cout << "validation: ";
     int validation;
@@ -24,7 +32,7 @@ int main() {
     int log_epoch;
     cin >> log_epoch;
 
-    experiment_bgv(64, blind, flops, log_epoch, validation);
+    experiment_bgv(N, blind, flops, log_epoch, validation, shift);
 //    for (int N = 1; N <= 64; N++)
 //        experiment_ckks(N, N, flops, log_epoch, 0);
 //    for (int N = 2; N <= 64; N++)

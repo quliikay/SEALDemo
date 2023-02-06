@@ -61,11 +61,22 @@ private:
         return res;
     }
 
-    vector<uint64_t> vector_mul_matrix(vector<uint64_t> a, vector<vector<uint64_t>> b) {
+    vector<uint64_t> vector_mul_matrix(vector<uint64_t> a, vector<vector<uint64_t>> b, int shit) {
         vector<uint64_t> res(a.size(), 0);
-        for (int j = 0; j < b[0].size(); j++) {
-            for (int i = 0; i < b.size(); i++)
-                res[j] += a[i] * b[i][j];
+        if(shit){
+            for (int j = 0; j < b[0].size(); j++) {
+                for (int i = 0; i < b.size(); i++) {
+                    uint64_t temp = b[i][j];
+                    temp << a[i];
+                    res[j] += temp;
+                }
+            }
+        }
+        else{
+            for (int j = 0; j < b[0].size(); j++) {
+                for (int i = 0; i < b.size(); i++)
+                    res[j] += a[i] * b[i][j];
+            }
         }
         return res;
     }
@@ -89,10 +100,10 @@ private:
         return check;
     }
 
-    string verification(vector<uint64_t> check, vector<vector<uint64_t>> message) {
+    string verification(vector<uint64_t> check, vector<vector<uint64_t>> message, int shift) {
         vector<uint64_t> message_tail = message.back();
         message.pop_back();
-        bool ver = (message_tail == vector_mul_matrix(check, message));
+        bool ver = (message_tail == vector_mul_matrix(check, message, shift));
         if (ver)
             return "yes";
         else
@@ -190,9 +201,12 @@ public:
         col_a = N;
     }
 
-    void experiment(int flops, int log_epoch, int validation) {
+    void experiment(int flops, int log_epoch, int validation, int shift) {
         // log
-        string log_name = "bgv/" + to_string(rol_a) + 'x' + to_string(col_a) + ".log";
+        string log_name = "bgv/" + to_string(rol_a) + 'x' + to_string(col_a);
+        if(shift)
+            log_name += "_shift";
+        log_name += ".log";
         freopen(log_name.c_str(), "w", stdout);
 
         // init context
@@ -242,7 +256,7 @@ public:
             // prepare
             client_prepare_start = clock();
             vector<uint64_t> check = gen_check(message_a.size(), rand());
-            message_a.push_back(vector_mul_matrix(check, message_a));
+            message_a.push_back(vector_mul_matrix(check, message_a, shift));
             client_prepare_end = clock();
             client_prepare_time += double(client_prepare_end - client_prepare_start) / CLOCKS_PER_SEC;
 
@@ -271,7 +285,7 @@ public:
             string ver = "";
             if (blind) {
                 client_verification_start = clock();
-                ver = verification(check, message_res);
+                ver = verification(check, message_res, shift);
                 client_verification_end = clock();
                 client_verification_time +=
                         double(client_verification_end - client_verification_start) / CLOCKS_PER_SEC;
@@ -295,7 +309,7 @@ public:
     }
 };
 
-void experiment_bgv(int N, int blind, int flops, int log_epoch, int validation) {
+void experiment_bgv(int N, int blind, int flops, int log_epoch, int validation, int shift) {
     BGV bgv(N, blind);
-    bgv.experiment(flops, log_epoch, validation);
+    bgv.experiment(flops, log_epoch, validation, shift);
 }

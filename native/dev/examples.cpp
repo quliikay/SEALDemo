@@ -32,7 +32,8 @@ int main() {
     int log_epoch;
     cin >> log_epoch;
 
-    experiment_bgv(N, blind, flops, log_epoch, validation, shift);
+//    experiment_bgv(N, blind, flops, log_epoch, validation, shift);
+    experiment_bgv(N, blind, flops, log_epoch, validation, shift, 1);
 //    for (int N = 1; N <= 64; N++)
 //        experiment_ckks(N, N, flops, log_epoch, 0);
 //    for (int N = 2; N <= 64; N++)

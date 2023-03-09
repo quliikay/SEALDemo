@@ -83,6 +83,34 @@ private:
 		return m;
 	}
 
+	vector<pair<int, int>> get_indices(int col)
+	{
+		vector<pair<int, int>> indices;
+		for (int i = 0; i < col; i++)
+		{
+			for (int j = 0; j < col; j++)
+				indices.emplace_back(i, j);
+		}
+		random_device rd;
+		mt19937 g(rd());
+		shuffle(indices.begin(), indices.end(), g);
+		return indices;
+	}
+	vector<vector<uint64_t>> matrix_permute(vector<pair<int, int>> indices, vector<vector<uint64_t>> m)
+	{
+		vector<vector<uint64_t>> res(m.size(), vector<uint64_t>(m[0].size(), 0));
+		for (int i = 0; i < m.size(); i++)
+		{
+			for (int j = 0; j < m[i].size(); j++)
+			{
+				int x = indices[i * m[i].size() + j].first;
+				int y = indices[i * m[i].size() + j].second;
+				res[i][j] = m[x][y];
+			}
+		}
+		return res;
+	}
+
 	vector<uint64_t> vector_mul_matrix(vector<uint64_t> a, vector<vector<uint64_t>> b, int shit)
 	{
 		vector<uint64_t> res(a.size(), 0);
@@ -91,11 +119,7 @@ private:
 			for (int j = 0; j < b[0].size(); j++)
 			{
 				for (int i = 0; i < b.size(); i++)
-				{
-					uint64_t temp = b[i][j];
-					temp << a[i];
-					res[j] += temp;
-				}
+					res[j] += b[i][j] << a[i];
 			}
 		}
 		else
@@ -136,8 +160,16 @@ private:
 	{
 		vector<uint64_t> message_tail = message.back();
 		message.pop_back();
-		bool ver = (message_tail == vector_mul_matrix(check, message, shift));
-		if (ver)
+		if (message_tail == vector_mul_matrix(check, message, shift))
+			return "yes";
+		else
+			return "no";
+	}
+
+	string verification_square(
+		vector<pair<int, int>> indices, vector<vector<uint64_t>> message_res, vector<vector<uint64_t>> message_r_res)
+	{
+		if(matrix_permute(indices, message_res) == message_r_res)
 			return "yes";
 		else
 			return "no";
@@ -261,17 +293,18 @@ public:
 	BGV(int N, int blind)
 	{
 		this->blind = blind;
-		if (blind)
-			rol_a = N + 1;
-		else
-			rol_a = N;
+		rol_a = N;
 		col_a = N;
 	}
 
 	void experiment(int flops, int log_epoch, int validation, int shift)
 	{
+		if (blind)
+			this->rol_a = this->rol_a + 1;
 		// log
-		string log_name = "bgv/" + to_string(rol_a) + 'x' + to_string(col_a);
+		string log_name = "bgv/shift/" + to_string(col_a);
+		if (blind)
+			log_name += "_blind";
 		if (shift)
 			log_name += "_shift";
 		log_name += ".log";
@@ -322,12 +355,16 @@ public:
 			vector<vector<uint64_t>> message_a = init_message(col_a, rand());
 			vector<vector<uint64_t>> message_b = init_message(col_a, rand());
 
-			// prepare
-			client_prepare_start = clock();
-			vector<uint64_t> check = gen_check(message_a.size(), rand());
-			message_a.push_back(vector_mul_matrix(check, message_a, shift));
-			client_prepare_end = clock();
-			client_prepare_time += double(client_prepare_end - client_prepare_start) / CLOCKS_PER_SEC;
+			// client a: preparation
+			vector<uint64_t> check;
+			if(blind)
+			{
+				client_prepare_start = clock();
+				check = gen_check(message_a.size(), rand());
+				message_a.push_back(vector_mul_matrix(check, message_a, shift));
+				client_prepare_end = clock();
+				client_prepare_time += double(client_prepare_end - client_prepare_start) / CLOCKS_PER_SEC;
+			}
 
 			// client a: convert message a to ciphertext
 			client_enc_start = clock();
@@ -367,15 +404,10 @@ public:
 					cout << "[" << i + 1 << "|" << flops << "] [" << client_prepare_time << "|" << client_enc_time
 						 << "|" << client_dec_time << "|" << client_verification_time << "] [" << server_time
 						 << "|" << cache << "] [" << ver << "]" << endl;
-				else if (blind)
+				else
 					cout << "[" << i + 1 << "|" << flops << "] [" << client_prepare_time << "|" << client_enc_time
 						 << "|" << client_dec_time << "|" << client_verification_time << "] [" << server_time
 						 << "|" << cache << "]" << endl;
-				else
-				{
-					cout << "[" << i + 1 << "|" << flops << "] [" << client_enc_time << "|" << client_dec_time << "|"
-						 << server_time << "|" << cache << "]" << endl;
-				}
 			}
 		}
 	}
@@ -383,7 +415,10 @@ public:
 	void experiment_square(int flops, int log_epoch, int validation)
 	{
 		// log
-		string log_name = "bgv/square/" + to_string(rol_a) + ".log";
+		string log_name = "bgv/square/" + to_string(rol_a);
+		if (blind)
+			log_name += "_blind";
+		log_name += ".log";
 		freopen(log_name.c_str(), "w", stdout);
 
 		// init context
@@ -414,41 +449,91 @@ public:
 		double server_time = 0.0;
 		double client_enc_time = 0.0;
 		double client_dec_time = 0.0;
-		double cache = 0.0;
+		double client_prepare_time = 0.0;
+		double client_verification_time = 0.0;
 
+		double cache = 0.0;
 		clock_t client_enc_start, client_enc_end;
 		clock_t client_dec_start, client_dec_end;
 		clock_t server_start, server_end;
+		clock_t client_prepare_start, client_prepare_end;
+		clock_t client_verification_start, client_verification_end;
+
 
 		for (int i = 0; i < flops; i++)
 		{
 			// init message
 			srand(unsigned(time(nullptr)));
 			vector<vector<uint64_t>> message = init_message(col_a, rand());
+			vector<vector<uint64_t>> message_r;
+			vector<pair<int, int>> indices;
+
+			// client a: preparation
+			if (blind)
+			{
+				indices = get_indices(col_a);
+				client_prepare_start = clock();
+				message_r = matrix_permute(indices, message);
+				client_prepare_end = clock();
+				client_prepare_time += double(client_prepare_end - client_prepare_start) / CLOCKS_PER_SEC;
+			}
 
 			// client a: convert message a to ciphertext
+			Ciphertext ciphertext_r;
 			client_enc_start = clock();
 			Ciphertext ciphertext = matrix_to_ciphertext(message, batch_encoder, encryptor);
+			if (blind)
+				ciphertext_r = matrix_to_ciphertext(message_r, batch_encoder, encryptor);
 			client_enc_end = clock();
 			client_enc_time += double(client_enc_end - client_enc_start) / CLOCKS_PER_SEC;
+			if (blind)
+				cache += sizeof(ciphertext_r) / (1024.0 * 1024.0);
 			cache += sizeof(ciphertext) / (1024.0 * 1024.0);
 
 			// server compute
+			Ciphertext cipher_r_res;
 			server_start = clock();
 			Ciphertext cipher_res = server_compute_square(ciphertext, evaluator);
+			if (blind)
+				cipher_r_res = server_compute_square(ciphertext_r, evaluator);
 			server_end = clock();
 			server_time += double(server_end - server_start) / CLOCKS_PER_SEC;
 
 			// client a: decrypt
+			vector<vector<uint64_t>> message_r_res;
 			cache += sizeof(cipher_res) / (1024.0 * 1024.0);
+			if (blind)
+				cache += sizeof(cipher_r_res) / (1024.0 * 1024.0);
 			client_dec_start = clock();
 			vector<vector<uint64_t>> message_res = client_decrypt_square(cipher_res, decryptor, batch_encoder, col_a);
+			if (blind)
+				message_r_res = client_decrypt_square(cipher_r_res, decryptor, batch_encoder, col_a);
 			client_dec_end = clock();
 			client_dec_time += double(client_dec_end - client_dec_start) / CLOCKS_PER_SEC;
 
+			// verification
+			string ver = "";
+			if (blind)
+			{
+				client_verification_start = clock();
+				ver = verification_square(indices, message_res, message_r_res);
+				client_verification_end = clock();
+				client_verification_time +=
+					double(client_verification_end - client_verification_start) / CLOCKS_PER_SEC;
+			}
+
 			if ((i + 1) % log_epoch == 0)
-				cout << "[" << i + 1 << "|" << flops << "] [" << client_enc_time << "|" << client_dec_time << "|"
-					 << server_time << "|" << cache << "]" << endl;
+			{
+				if (validation && blind)
+					cout << "[" << i + 1 << "|" << flops << "] [" << client_prepare_time << "|" << client_enc_time
+						 << "|" << client_dec_time << "|" << client_verification_time << "] [" << server_time
+						 << "|" << cache << "] [" << ver << "]" << endl;
+				else
+					cout << "[" << i + 1 << "|" << flops << "] [" << client_prepare_time << "|" << client_enc_time
+						 << "|" << client_dec_time << "|" << client_verification_time << "] [" << server_time
+						 << "|" << cache << "]" << endl;
+			}
+
 		}
 	}
 };

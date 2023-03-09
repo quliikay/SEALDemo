@@ -1,0 +1,164 @@
+## This file contains all the build statements describing the
+# compilation DAG.
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# 
+# Which is the root file.
+# =============================================================================
+
+# =============================================================================
+# Project: SEALExamples
+# Configurations: Debug
+# =============================================================================
+
+#############################################
+# Minimal version of Ninja required by this file
+
+ninja_required_version = 1.5
+
+
+#############################################
+# Set configuration variable for custom commands.
+
+CONFIGURATION = Debug
+# =============================================================================
+# Include auxiliary files.
+
+
+#############################################
+# Include rules file.
+
+include CMakeFiles/rules.ninja
+
+# =============================================================================
+
+#############################################
+# Logical path to working directory; prefix for absolute paths.
+
+cmake_ninja_workdir = /Users/jiaqi/Research/SEALDemo/native/dev/cmake-build-debug/
+# =============================================================================
+# Object build statements for EXECUTABLE target dev
+
+
+#############################################
+# Order-only phony target for dev
+
+build cmake_object_order_depends_target_dev: phony || CMakeFiles/dev.dir
+
+build CMakeFiles/dev.dir/examples.cpp.o: CXX_COMPILER__dev_Debug /Users/jiaqi/Research/SEALDemo/native/dev/examples.cpp || cmake_object_order_depends_target_dev
+  DEP_FILE = CMakeFiles/dev.dir/examples.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++17
+  INCLUDES = -isystem /opt/homebrew/include/SEAL-4.1 -isystem /opt/homebrew/include
+  OBJECT_DIR = CMakeFiles/dev.dir
+  OBJECT_FILE_DIR = CMakeFiles/dev.dir
+
+build CMakeFiles/dev.dir/BFV.cpp.o: CXX_COMPILER__dev_Debug /Users/jiaqi/Research/SEALDemo/native/dev/BFV.cpp || cmake_object_order_depends_target_dev
+  DEP_FILE = CMakeFiles/dev.dir/BFV.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++17
+  INCLUDES = -isystem /opt/homebrew/include/SEAL-4.1 -isystem /opt/homebrew/include
+  OBJECT_DIR = CMakeFiles/dev.dir
+  OBJECT_FILE_DIR = CMakeFiles/dev.dir
+
+build CMakeFiles/dev.dir/BGV.cpp.o: CXX_COMPILER__dev_Debug /Users/jiaqi/Research/SEALDemo/native/dev/BGV.cpp || cmake_object_order_depends_target_dev
+  DEP_FILE = CMakeFiles/dev.dir/BGV.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++17
+  INCLUDES = -isystem /opt/homebrew/include/SEAL-4.1 -isystem /opt/homebrew/include
+  OBJECT_DIR = CMakeFiles/dev.dir
+  OBJECT_FILE_DIR = CMakeFiles/dev.dir
+
+build CMakeFiles/dev.dir/CKKS.cpp.o: CXX_COMPILER__dev_Debug /Users/jiaqi/Research/SEALDemo/native/dev/CKKS.cpp || cmake_object_order_depends_target_dev
+  DEP_FILE = CMakeFiles/dev.dir/CKKS.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++17
+  INCLUDES = -isystem /opt/homebrew/include/SEAL-4.1 -isystem /opt/homebrew/include
+  OBJECT_DIR = CMakeFiles/dev.dir
+  OBJECT_FILE_DIR = CMakeFiles/dev.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target dev
+
+
+#############################################
+# Link the executable bin/dev
+
+build bin/dev: CXX_EXECUTABLE_LINKER__dev_Debug CMakeFiles/dev.dir/examples.cpp.o CMakeFiles/dev.dir/BFV.cpp.o CMakeFiles/dev.dir/BGV.cpp.o CMakeFiles/dev.dir/CKKS.cpp.o | /opt/homebrew/lib/libseal.4.1.1.dylib
+  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk
+  LINK_LIBRARIES = -Wl,-rpath,/opt/homebrew/lib  /opt/homebrew/lib/libseal.4.1.1.dylib
+  OBJECT_DIR = CMakeFiles/dev.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = bin/dev
+  TARGET_PDB = dev.dbg
+
+
+#############################################
+# Utility command for edit_cache
+
+build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /Users/jiaqi/Research/SEALDemo/native/dev/cmake-build-debug && /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build edit_cache: phony CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /Users/jiaqi/Research/SEALDemo/native/dev/cmake-build-debug && /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake --regenerate-during-build -S/Users/jiaqi/Research/SEALDemo/native/dev -B/Users/jiaqi/Research/SEALDemo/native/dev/cmake-build-debug
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build rebuild_cache: phony CMakeFiles/rebuild_cache.util
+
+# =============================================================================
+# Target aliases.
+
+build dev: phony bin/dev
+
+# =============================================================================
+# Folder targets.
+
+# =============================================================================
+
+#############################################
+# Folder: /Users/jiaqi/Research/SEALDemo/native/dev/cmake-build-debug
+
+build all: phony bin/dev
+
+# =============================================================================
+# Built-in targets
+
+
+#############################################
+# Re-run CMake if any of its inputs changed.
+
+build build.ninja: RERUN_CMAKE | /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeFindDependencyMacro.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CheckCXXSourceCompiles.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CheckIncludeFileCXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CheckLibraryExists.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageMessage.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindThreads.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindZLIB.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Internal/CheckSourceCompiles.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/SelectLibraryConfigurations.cmake /Users/jiaqi/Research/SEALDemo/native/dev/CMakeLists.txt /opt/homebrew/lib/cmake/SEAL-4.1/SEALConfig.cmake /opt/homebrew/lib/cmake/SEAL-4.1/SEALConfigVersion.cmake /opt/homebrew/lib/cmake/SEAL-4.1/SEALTargets-release.cmake /opt/homebrew/lib/cmake/SEAL-4.1/SEALTargets.cmake /opt/homebrew/lib/cmake/zstd/zstdConfig.cmake /opt/homebrew/lib/cmake/zstd/zstdConfigVersion.cmake /opt/homebrew/lib/cmake/zstd/zstdTargets-release.cmake /opt/homebrew/lib/cmake/zstd/zstdTargets.cmake /opt/homebrew/share/cmake/Microsoft.GSL/Microsoft.GSLConfig.cmake /opt/homebrew/share/cmake/Microsoft.GSL/Microsoft.GSLConfigVersion.cmake CMakeCache.txt CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake
+  pool = console
+
+
+#############################################
+# A missing CMake input file is not an error.
+
+build /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeFindDependencyMacro.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CheckCXXSourceCompiles.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CheckIncludeFileCXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CheckLibraryExists.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageMessage.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindThreads.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindZLIB.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Internal/CheckSourceCompiles.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/SelectLibraryConfigurations.cmake /Users/jiaqi/Research/SEALDemo/native/dev/CMakeLists.txt /opt/homebrew/lib/cmake/SEAL-4.1/SEALConfig.cmake /opt/homebrew/lib/cmake/SEAL-4.1/SEALConfigVersion.cmake /opt/homebrew/lib/cmake/SEAL-4.1/SEALTargets-release.cmake /opt/homebrew/lib/cmake/SEAL-4.1/SEALTargets.cmake /opt/homebrew/lib/cmake/zstd/zstdConfig.cmake /opt/homebrew/lib/cmake/zstd/zstdConfigVersion.cmake /opt/homebrew/lib/cmake/zstd/zstdTargets-release.cmake /opt/homebrew/lib/cmake/zstd/zstdTargets.cmake /opt/homebrew/share/cmake/Microsoft.GSL/Microsoft.GSLConfig.cmake /opt/homebrew/share/cmake/Microsoft.GSL/Microsoft.GSLConfigVersion.cmake CMakeCache.txt CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake: phony
+
+
+#############################################
+# Clean all the built files.
+
+build clean: CLEAN
+
+
+#############################################
+# Print all primary targets available.
+
+build help: HELP
+
+
+#############################################
+# Make the all target the default.
+
+default all
